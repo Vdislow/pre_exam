@@ -9,7 +9,6 @@ router.register('category', views.CategoryViewSet, basename='category')
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('category/<int:category_id>/', views.CategoryRUDView.as_view()),
     path('category/<int:category_id>/item/', views.ItemView.as_view()),
     path('category/<int:category_id>/item/<int:pk>/', views.ItemRUDView.as_view()),
     path('category/<int:category_id>/item/<int:pk>/order/', views.OrderListCreateView.as_view()),

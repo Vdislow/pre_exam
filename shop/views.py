@@ -5,33 +5,16 @@ from rest_framework.permissions import BasePermission
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, get_object_or_404
+from rest_framework.generics import CreateAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView, get_object_or_404
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 
 from .models import Item, Category, Order
 from account.models import Profile
 from .serializers import CategorySerializer, ItemSerializer, OrderSerializer
-from .permissions import IsAuthorPermission, ItemRUDPermission, OrderPermission, OrderRUDPermission
+from .permissions import IsAuthorPermission, ItemRUDPermission, OrderPermission
 
 
 class CategoryViewSet(ModelViewSet):
-    queryset = Category.objects.all()
-    serializer_class = CategorySerializer
-    authentication_classes = [SessionAuthentication, TokenAuthentication]
-    permission_classes = [IsAuthorPermission, ]
-
-    def perform_create(self, serializer):
-        serializer.save()
-
-    def get_queryset(self):
-        queryset = self.queryset
-        user = self.request.query_params.get('user')
-        if user:
-            queryset = queryset.filter(user__username=user)
-        return queryset
-
-
-class CategoryRUDView(RetrieveUpdateDestroyAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     authentication_classes = [SessionAuthentication, TokenAuthentication]
@@ -48,9 +31,10 @@ class ItemView(ListCreateAPIView):
         return self.queryset.filter(category_id=self.kwargs['category_id'])
 
     def perform_create(self, serializer):
-        serializer.save(category=get_object_or_404(Category, id=self.kwargs['category_id']),
-                        # profile=get_object_or_404(Profile, id=self.kwargs['pk']),
-                        )
+        serializer.save(
+            category=get_object_or_404(Category, id=self.kwargs['category_id']),
+            profile=self.request.user.profile
+        )
 
 
 class ItemRUDView(RetrieveUpdateDestroyAPIView):
@@ -60,29 +44,24 @@ class ItemRUDView(RetrieveUpdateDestroyAPIView):
     permission_classes = [ItemRUDPermission, ]
 
 
-class OrderListCreateView(ListCreateAPIView):
+class OrderListCreateView(CreateAPIView):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
     authentication_classes = [SessionAuthentication, TokenAuthentication]
     permission_classes = [OrderPermission, ]
 
-    def get_queryset(self):
-        return self.queryset.filter(item_id=self.kwargs['item_id'])
-
     def perform_create(self, serializer):
-        serializer.save(item=get_object_or_404(Item, id=self.kwargs['item_id']),
-                        # profile=get_object_or_404(Profile, id=self.kwargs['pk'])
-                        )
+        serializer.save(
+            item=get_object_or_404(Item, id=self.kwargs['pk']),
+            profile=self.request.user.profile
+        )
 
 
 class OrderRUDView(RetrieveUpdateDestroyAPIView):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
     authentication_classes = [SessionAuthentication, TokenAuthentication]
-    permission_classes = [OrderRUDPermission, ]
-
-    def perform_create(self, serializer):
-        serializer.save()
+    permission_classes = [OrderPermission, ]
 
     def get_queryset(self):
         return self.queryset.filter(id=self.kwargs['pk'])

@@ -13,9 +13,7 @@ class ItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = Item
         fields = '__all__'
-        read_only_fields = ['category',
-                            # 'profile'
-                            ]
+        read_only_fields = ['category', 'profile']
 
 
 class OrderSerializer(serializers.ModelSerializer):
@@ -23,7 +21,7 @@ class OrderSerializer(serializers.ModelSerializer):
         model = Order
         fields = '__all__'
         read_only_fields = ['item',
-                            # 'profile',
+                            'profile',
                             ]
 
 

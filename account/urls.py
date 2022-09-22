@@ -9,4 +9,5 @@ urlpatterns = [
     path('register/sender/', views.RegisterSenderView.as_view()),
     path('', include('rest_framework.urls')),
     path('register/buyer/', views.RegisterBuyerView.as_view()),
+    path('token/', obtain_auth_token),
 ]
